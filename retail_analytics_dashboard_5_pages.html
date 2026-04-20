@@ -1,0 +1,645 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);background:var(--color-background-tertiary);color:var(--color-text-primary)}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+
+.dash-header{background:var(--color-background-primary);border-bottom:0.5px solid var(--color-border-tertiary);padding:12px 20px;display:flex;align-items:center;justify-content:space-between}
+.dash-title{font-size:15px;font-weight:500;color:var(--color-text-primary)}
+.dash-sub{font-size:11px;color:var(--color-text-tertiary);margin-top:2px}
+.dash-badge{font-size:10px;font-weight:500;padding:3px 8px;border-radius:20px;background:var(--color-background-success);color:var(--color-text-success)}
+
+.nav-tabs{display:flex;gap:2px;background:var(--color-background-primary);border-bottom:0.5px solid var(--color-border-tertiary);padding:0 16px;overflow-x:auto}
+.tab-btn{padding:10px 14px;font-size:12px;font-weight:500;color:var(--color-text-secondary);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;font-family:var(--font-sans);transition:color .15s}
+.tab-btn:hover{color:var(--color-text-primary)}
+.tab-btn.active{color:var(--color-text-info);border-bottom-color:#378ADD}
+
+.page{display:none;padding:16px}
+.page.active{display:block}
+
+.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px}
+.kpi{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:12px 14px;border-top:3px solid transparent}
+.kpi-label{font-size:11px;color:var(--color-text-secondary);margin-bottom:6px;font-weight:500;text-transform:uppercase;letter-spacing:.4px}
+.kpi-val{font-size:20px;font-weight:500;color:var(--color-text-primary)}
+.kpi-delta{font-size:11px;margin-top:4px}
+.delta-up{color:#3B6D11}.delta-dn{color:#A32D2D}.delta-warn{color:#854F0B}
+
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:14px}
+.card-title{font-size:12px;font-weight:500;color:var(--color-text-secondary);margin-bottom:12px;text-transform:uppercase;letter-spacing:.4px}
+
+.ch-wrap{position:relative;width:100%}
+.insight-box{background:var(--color-background-info);border:0.5px solid var(--color-border-info);border-radius:var(--border-radius-md);padding:10px 12px;margin-top:12px;font-size:12px;color:var(--color-text-info);line-height:1.5}
+
+.tbl{width:100%;border-collapse:collapse;font-size:12px}
+.tbl th{text-align:left;padding:6px 8px;border-bottom:0.5px solid var(--color-border-tertiary);color:var(--color-text-secondary);font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.3px}
+.tbl td{padding:6px 8px;border-bottom:0.5px solid var(--color-border-tertiary);color:var(--color-text-primary)}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:var(--color-background-secondary)}
+
+.seg-pill{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:500}
+.pill-champ{background:#EAF3DE;color:#27500A}
+.pill-loyal{background:#E6F1FB;color:#0C447C}
+.pill-risk{background:#FAEEDA;color:#633806}
+.pill-lost{background:#FCEBEB;color:#791F1F}
+.pill-pot{background:#EEEDFE;color:#3C3489}
+.pill-rec{background:#F1EFE8;color:#444441}
+
+.bar-h{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.bar-label{font-size:11px;color:var(--color-text-secondary);width:90px;text-align:right;flex-shrink:0}
+.bar-track{flex:1;height:14px;background:var(--color-background-secondary);border-radius:3px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px;transition:width .6s ease}
+.bar-val{font-size:11px;color:var(--color-text-secondary);width:52px;flex-shrink:0}
+
+.region-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.reg-card{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px 12px}
+.reg-name{font-size:12px;font-weight:500;color:var(--color-text-primary);margin-bottom:6px}
+.reg-stats{display:flex;gap:12px}
+.reg-stat{font-size:11px;color:var(--color-text-secondary)}
+.reg-stat span{font-weight:500;color:var(--color-text-primary)}
+
+.forecast-row{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:0.5px solid var(--color-border-tertiary)}
+.forecast-row:last-child{border-bottom:none}
+.forecast-month{font-size:12px;font-weight:500;color:var(--color-text-primary)}
+.forecast-val{font-size:12px;font-weight:500;color:#185FA5}
+.forecast-ci{font-size:11px;color:var(--color-text-tertiary)}
+.forecast-bar-wrap{flex:1;margin:0 12px;height:8px;background:var(--color-background-secondary);border-radius:4px;overflow:hidden}
+.forecast-bar-fill{height:100%;background:#378ADD;border-radius:4px}
+</style>
+
+<h2 class="sr-only">Retail analytics intelligence dashboard — 5 pages covering executive summary, regional analysis, product analysis, customer insights, and sales forecast. Built from 9,800 rows of Superstore data, $2.26M total revenue, 2015–2018.</h2>
+
+<div class="dash-header">
+  <div>
+    <div class="dash-title">Retail Analytics Intelligence Platform</div>
+    <div class="dash-sub">Superstore dataset  ·  9,800 rows  ·  Jan 2015 – Dec 2018  ·  $2.26M revenue</div>
+  </div>
+  <div class="dash-badge">Live Dashboard</div>
+</div>
+
+<div class="nav-tabs">
+  <button class="tab-btn active" onclick="switchPage('p1',this)">Executive Summary</button>
+  <button class="tab-btn" onclick="switchPage('p2',this)">Regional Analysis</button>
+  <button class="tab-btn" onclick="switchPage('p3',this)">Product Analysis</button>
+  <button class="tab-btn" onclick="switchPage('p4',this)">Customer Insights</button>
+  <button class="tab-btn" onclick="switchPage('p5',this)">Sales Forecast</button>
+</div>
+
+<!-- ═══════════════ PAGE 1: EXECUTIVE ═══════════════ -->
+<div class="page active" id="p1">
+  <div class="kpi-row">
+    <div class="kpi" style="border-top-color:#185FA5">
+      <div class="kpi-label">Total Revenue</div>
+      <div class="kpi-val">$2.26M</div>
+      <div class="kpi-delta delta-up">4 years of data</div>
+    </div>
+    <div class="kpi" style="border-top-color:#3B6D11">
+      <div class="kpi-label">Total Orders</div>
+      <div class="kpi-val">4,922</div>
+      <div class="kpi-delta delta-up">↑ 75% vs 2015</div>
+    </div>
+    <div class="kpi" style="border-top-color:#854F0B">
+      <div class="kpi-label">Customers</div>
+      <div class="kpi-val">793</div>
+      <div class="kpi-delta">Unique buyers</div>
+    </div>
+    <div class="kpi" style="border-top-color:#534AB7">
+      <div class="kpi-label">Avg Order Value</div>
+      <div class="kpi-val">$459</div>
+      <div class="kpi-delta">Per unique order</div>
+    </div>
+    <div class="kpi" style="border-top-color:#A32D2D">
+      <div class="kpi-label">Delay Rate</div>
+      <div class="kpi-val">18.2%</div>
+      <div class="kpi-delta delta-warn">Standard Class only</div>
+    </div>
+  </div>
+
+  <div class="grid-2" style="margin-bottom:12px">
+    <div class="card">
+      <div class="card-title">Monthly revenue trend (2015–2018)</div>
+      <div class="ch-wrap" style="height:180px"><canvas id="c_monthly" role="img" aria-label="Monthly sales from Jan 2015 to Dec 2018 showing strong Q4 spikes each year">Monthly sales trend from 2015 to 2018</canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Annual revenue with YoY growth</div>
+      <div class="ch-wrap" style="height:180px"><canvas id="c_annual" role="img" aria-label="Annual revenue: 2015 $479K, 2016 $459K (-4.3%), 2017 $600K (+30.6%), 2018 $722K (+20.3%)">Annual revenue by year</canvas></div>
+    </div>
+  </div>
+
+  <div class="grid-3">
+    <div class="card">
+      <div class="card-title">Revenue by segment</div>
+      <div class="ch-wrap" style="height:160px"><canvas id="c_segment" role="img" aria-label="Revenue by segment: Consumer 50.8%, Corporate 30.4%, Home Office 18.8%">Revenue by customer segment</canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Revenue by category</div>
+      <div class="ch-wrap" style="height:160px"><canvas id="c_category" role="img" aria-label="Revenue by category: Technology 36.6%, Furniture 32.2%, Office Supplies 31.2%">Revenue by product category</canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Ship mode distribution</div>
+      <div class="ch-wrap" style="height:160px"><canvas id="c_shipmode" role="img" aria-label="Ship mode orders: Standard Class 5859 (60%), Second Class 1902 (19%), First Class 1501 (15%), Same Day 538 (6%)">Orders by ship mode</canvas></div>
+    </div>
+  </div>
+
+  <div class="insight-box">
+    Key insight: 2016 saw a 4.3% revenue dip ($479K to $459K) before recovering strongly — +30.6% in 2017 and +20.3% in 2018. Q4 consistently drives the highest monthly sales each year, peaking at $117,938 in November 2018.
+  </div>
+</div>
+
+<!-- ═══════════════ PAGE 2: REGIONAL ═══════════════ -->
+<div class="page" id="p2">
+  <div class="kpi-row" style="grid-template-columns:repeat(4,1fr)">
+    <div class="kpi" style="border-top-color:#185FA5">
+      <div class="kpi-label">West</div>
+      <div class="kpi-val">$710K</div>
+      <div class="kpi-delta">31.4% of revenue</div>
+    </div>
+    <div class="kpi" style="border-top-color:#3B6D11">
+      <div class="kpi-label">East</div>
+      <div class="kpi-val">$670K</div>
+      <div class="kpi-delta">29.6% of revenue</div>
+    </div>
+    <div class="kpi" style="border-top-color:#854F0B">
+      <div class="kpi-label">Central</div>
+      <div class="kpi-val">$493K</div>
+      <div class="kpi-delta delta-warn">Highest delay 18.9%</div>
+    </div>
+    <div class="kpi" style="border-top-color:#A32D2D">
+      <div class="kpi-label">South</div>
+      <div class="kpi-val">$389K</div>
+      <div class="kpi-delta delta-dn">Lowest 17.2%</div>
+    </div>
+  </div>
+
+  <div class="grid-2" style="margin-bottom:12px">
+    <div class="card">
+      <div class="card-title">Revenue by region</div>
+      <div class="ch-wrap" style="height:200px"><canvas id="c_region_bar" role="img" aria-label="Regional revenue: West $710K, East $670K, Central $493K, South $389K">Revenue by region bar chart</canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Delivery delay rate by region (%)</div>
+      <div class="ch-wrap" style="height:200px"><canvas id="c_region_delay" role="img" aria-label="Delay rates by region: Central 18.9%, West 18.8%, South 17.7%, East 17.3%">Delay rate by region</canvas></div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Top 15 states by revenue</div>
+      <div style="margin-top:4px">
+        <div class="bar-h"><div class="bar-label">California</div><div class="bar-track"><div class="bar-fill" style="width:100%;background:#378ADD"></div></div><div class="bar-val">$446K</div></div>
+        <div class="bar-h"><div class="bar-label">New York</div><div class="bar-track"><div class="bar-fill" style="width:68.7%;background:#378ADD"></div></div><div class="bar-val">$306K</div></div>
+        <div class="bar-h"><div class="bar-label">Texas</div><div class="bar-track"><div class="bar-fill" style="width:37.8%;background:#185FA5"></div></div><div class="bar-val">$169K</div></div>
+        <div class="bar-h"><div class="bar-label">Washington</div><div class="bar-track"><div class="bar-fill" style="width:30.3%;background:#185FA5"></div></div><div class="bar-val">$135K</div></div>
+        <div class="bar-h"><div class="bar-label">Pennsylvania</div><div class="bar-track"><div class="bar-fill" style="width:26.1%;background:#185FA5"></div></div><div class="bar-val">$116K</div></div>
+        <div class="bar-h"><div class="bar-label">Florida</div><div class="bar-track"><div class="bar-fill" style="width:19.8%;background:#0C447C"></div></div><div class="bar-val">$88K</div></div>
+        <div class="bar-h"><div class="bar-label">Illinois</div><div class="bar-track"><div class="bar-fill" style="width:17.8%;background:#0C447C"></div></div><div class="bar-val">$79K</div></div>
+        <div class="bar-h"><div class="bar-label">Michigan</div><div class="bar-track"><div class="bar-fill" style="width:17.1%;background:#0C447C"></div></div><div class="bar-val">$76K</div></div>
+        <div class="bar-h"><div class="bar-label">Ohio</div><div class="bar-track"><div class="bar-fill" style="width:16.8%;background:#0C447C"></div></div><div class="bar-val">$75K</div></div>
+        <div class="bar-h"><div class="bar-label">Virginia</div><div class="bar-track"><div class="bar-fill" style="width:15.8%;background:#0C447C"></div></div><div class="bar-val">$71K</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Region performance scorecard</div>
+      <table class="tbl" style="margin-top:4px">
+        <thead><tr><th>Region</th><th>Revenue</th><th>Orders</th><th>Delay</th><th>Share</th></tr></thead>
+        <tbody>
+          <tr><td>West</td><td>$710,220</td><td>1,587</td><td style="color:#854F0B">18.8%</td><td>31.4%</td></tr>
+          <tr><td>East</td><td>$669,519</td><td>1,369</td><td style="color:#3B6D11">17.3%</td><td>29.6%</td></tr>
+          <tr><td>Central</td><td>$492,647</td><td>1,156</td><td style="color:#A32D2D">18.9%</td><td>21.8%</td></tr>
+          <tr><td>South</td><td>$389,151</td><td>810</td><td style="color:#854F0B">17.7%</td><td>17.2%</td></tr>
+        </tbody>
+      </table>
+      <div class="insight-box" style="margin-top:10px">
+        South region has the lowest revenue ($389K, 17.2%) and is the key growth opportunity. California alone ($446K) exceeds the entire South region.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ PAGE 3: PRODUCT ═══════════════ -->
+<div class="page" id="p3">
+  <div class="kpi-row" style="grid-template-columns:repeat(3,1fr)">
+    <div class="kpi" style="border-top-color:#185FA5">
+      <div class="kpi-label">Technology</div>
+      <div class="kpi-val">$827K</div>
+      <div class="kpi-delta delta-up">36.6% of revenue  ·  #1</div>
+    </div>
+    <div class="kpi" style="border-top-color:#3B6D11">
+      <div class="kpi-label">Furniture</div>
+      <div class="kpi-val">$729K</div>
+      <div class="kpi-delta">32.2% of revenue  ·  #2</div>
+    </div>
+    <div class="kpi" style="border-top-color:#854F0B">
+      <div class="kpi-label">Office Supplies</div>
+      <div class="kpi-val">$705K</div>
+      <div class="kpi-delta">31.2% of revenue  ·  #3</div>
+    </div>
+  </div>
+
+  <div class="grid-2" style="margin-bottom:12px">
+    <div class="card">
+      <div class="card-title">Top 10 sub-categories by revenue</div>
+      <div class="ch-wrap" style="height:340px"><canvas id="c_subcat" role="img" aria-label="Top sub-categories: Phones $328K, Chairs $323K, Storage $219K, Tables $203K, Binders $200K, Machines $189K, Accessories $164K, Copiers $146K, Bookcases $114K, Appliances $105K">Top 10 sub-categories by sales</canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Category revenue split</div>
+      <div class="ch-wrap" style="height:180px"><canvas id="c_cat_donut" role="img" aria-label="Category split: Technology 36.6%, Furniture 32.2%, Office Supplies 31.2%">Category revenue donut chart</canvas></div>
+      <div style="margin-top:16px">
+        <div class="card-title">Bottom 5 sub-categories</div>
+        <table class="tbl" style="margin-top:6px">
+          <thead><tr><th>Sub-Category</th><th>Revenue</th><th>Items</th></tr></thead>
+          <tbody>
+            <tr><td>Fasteners</td><td style="color:#A32D2D">$3,002</td><td>217</td></tr>
+            <tr><td>Labels</td><td style="color:#A32D2D">$12,348</td><td>364</td></tr>
+            <tr><td>Envelopes</td><td style="color:#854F0B">$16,128</td><td>254</td></tr>
+            <tr><td>Art</td><td style="color:#854F0B">$26,705</td><td>796</td></tr>
+            <tr><td>Supplies</td><td style="color:#854F0B">$46,420</td><td>190</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="insight-box">
+    Phones ($328K) and Chairs ($323K) are the top 2 sub-categories and are nearly equal. Technology leads at 36.6% despite having the fewest line items (1,813) — highest average sale value at $456 per line.
+  </div>
+</div>
+
+<!-- ═══════════════ PAGE 4: CUSTOMERS ═══════════════ -->
+<div class="page" id="p4">
+  <div class="kpi-row" style="grid-template-columns:repeat(4,1fr)">
+    <div class="kpi" style="border-top-color:#3B6D11">
+      <div class="kpi-label">Champions</div>
+      <div class="kpi-val">169</div>
+      <div class="kpi-delta delta-up">29.4% of revenue</div>
+    </div>
+    <div class="kpi" style="border-top-color:#185FA5">
+      <div class="kpi-label">Loyal Customers</div>
+      <div class="kpi-val">166</div>
+      <div class="kpi-delta delta-up">25.2% of revenue</div>
+    </div>
+    <div class="kpi" style="border-top-color:#854F0B">
+      <div class="kpi-label">At Risk</div>
+      <div class="kpi-val">141</div>
+      <div class="kpi-delta delta-warn">$489K at stake</div>
+    </div>
+    <div class="kpi" style="border-top-color:#A32D2D">
+      <div class="kpi-label">Lost</div>
+      <div class="kpi-val">71</div>
+      <div class="kpi-delta delta-dn">$84K revenue lost</div>
+    </div>
+  </div>
+
+  <div class="grid-2" style="margin-bottom:12px">
+    <div class="card">
+      <div class="card-title">RFM segment revenue share</div>
+      <div class="ch-wrap" style="height:200px"><canvas id="c_rfm_donut" role="img" aria-label="RFM revenue: Champions 29.4%, Loyal 25.2%, At Risk 21.6%, Potential Loyalists 13%, Recent 7%, Lost 3.7%">RFM segment revenue donut</canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">RFM segment customer count</div>
+      <div class="ch-wrap" style="height:200px"><canvas id="c_rfm_bar" role="img" aria-label="RFM customer counts: Potential Loyalists 157, Champions 169, Loyal 166, At Risk 141, Recent 89, Lost 71">RFM customer count bar chart</canvas></div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Top 10 customers by lifetime value</div>
+      <table class="tbl" style="margin-top:4px">
+        <thead><tr><th>Customer</th><th>Segment</th><th>Region</th><th>Orders</th><th>LTV</th></tr></thead>
+        <tbody>
+          <tr><td>Sean Miller</td><td>Home Office</td><td>South</td><td>5</td><td style="font-weight:500;color:#185FA5">$23,669</td></tr>
+          <tr><td>Tamara Chand</td><td>Corporate</td><td>Central</td><td>5</td><td style="color:#185FA5">$18,437</td></tr>
+          <tr><td>Raymond Buch</td><td>Consumer</td><td>West</td><td>6</td><td style="color:#185FA5">$14,345</td></tr>
+          <tr><td>Tom Ashbrook</td><td>Home Office</td><td>East</td><td>4</td><td style="color:#185FA5">$13,723</td></tr>
+          <tr><td>Adrian Barton</td><td>Consumer</td><td>Central</td><td>10</td><td style="color:#185FA5">$12,182</td></tr>
+          <tr><td>Becky Martin</td><td>Consumer</td><td>Central</td><td>4</td><td>$10,540</td></tr>
+          <tr><td>Hunter Lopez</td><td>Consumer</td><td>East</td><td>6</td><td>$10,523</td></tr>
+          <tr><td>Bill Shonely</td><td>Corporate</td><td>East</td><td>5</td><td>$10,022</td></tr>
+          <tr><td>Sanjit Chand</td><td>Consumer</td><td>Central</td><td>9</td><td>$9,900</td></tr>
+          <tr><td>Greg Tran</td><td>Consumer</td><td>East</td><td>11</td><td>$9,383</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-title">RFM segment action plan</div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px">
+        <div style="background:var(--color-background-success);border-radius:var(--border-radius-md);padding:10px 12px">
+          <div style="font-size:11px;font-weight:500;color:#27500A;margin-bottom:3px">Champions (169)  —  $664,889</div>
+          <div style="font-size:11px;color:#3B6D11">Reward with exclusive early access. These 21% of customers drive 29.4% of all revenue.</div>
+        </div>
+        <div style="background:var(--color-background-info);border-radius:var(--border-radius-md);padding:10px 12px">
+          <div style="font-size:11px;font-weight:500;color:#0C447C;margin-bottom:3px">Loyal Customers (166)  —  $570,646</div>
+          <div style="font-size:11px;color:#185FA5">Upsell premium products. Strong frequency but can grow Monetary score.</div>
+        </div>
+        <div style="background:var(--color-background-warning);border-radius:var(--border-radius-md);padding:10px 12px">
+          <div style="font-size:11px;font-weight:500;color:#633806;margin-bottom:3px">At Risk (141)  —  $489,373  ← PRIORITY</div>
+          <div style="font-size:11px;color:#854F0B">Launch targeted re-engagement. $489K at stake. Send personalised discount before they turn Lost.</div>
+        </div>
+        <div style="background:var(--color-background-danger);border-radius:var(--border-radius-md);padding:10px 12px">
+          <div style="font-size:11px;font-weight:500;color:#791F1F;margin-bottom:3px">Lost (71)  —  $83,900</div>
+          <div style="font-size:11px;color:#A32D2D">Win-back campaign with strong incentive. High recency — may need significant offer.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ PAGE 5: FORECAST ═══════════════ -->
+<div class="page" id="p5">
+  <div class="kpi-row" style="grid-template-columns:repeat(4,1fr)">
+    <div class="kpi" style="border-top-color:#185FA5">
+      <div class="kpi-label">H1-2019 Forecast</div>
+      <div class="kpi-val">$311K</div>
+      <div class="kpi-delta">Jan–Jun 2019</div>
+    </div>
+    <div class="kpi" style="border-top-color:#3B6D11">
+      <div class="kpi-label">Peak Month</div>
+      <div class="kpi-val">Mar 2019</div>
+      <div class="kpi-delta delta-up">$79K projected</div>
+    </div>
+    <div class="kpi" style="border-top-color:#854F0B">
+      <div class="kpi-label">Model MAPE</div>
+      <div class="kpi-val">16.8%</div>
+      <div class="kpi-delta">4-month holdout</div>
+    </div>
+    <div class="kpi" style="border-top-color:#534AB7">
+      <div class="kpi-label">2018 Actual</div>
+      <div class="kpi-val">$722K</div>
+      <div class="kpi-delta delta-up">↑ 20.3% YoY</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:12px">
+    <div class="card-title">Sales trend + 6-month forecast (Jan–Jun 2019)</div>
+    <div class="ch-wrap" style="height:220px"><canvas id="c_forecast" role="img" aria-label="Monthly sales from 2015 to 2018 actual, then Prophet forecast for Jan to Jun 2019 with March peak at $79K">Sales forecast chart</canvas></div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Monthly forecast with confidence intervals</div>
+      <div style="margin-top:6px">
+        <div class="forecast-row">
+          <div class="forecast-month">January 2019</div>
+          <div class="forecast-bar-wrap"><div class="forecast-bar-fill" style="width:52%"></div></div>
+          <div><div class="forecast-val">$41,378</div><div class="forecast-ci">$33K – $49K</div></div>
+        </div>
+        <div class="forecast-row">
+          <div class="forecast-month">February 2019</div>
+          <div class="forecast-bar-wrap"><div class="forecast-bar-fill" style="width:41%"></div></div>
+          <div><div class="forecast-val">$32,207</div><div class="forecast-ci">$25K – $40K</div></div>
+        </div>
+        <div class="forecast-row" style="background:var(--color-background-success);border-radius:6px;padding:7px 8px;margin:2px -8px">
+          <div class="forecast-month" style="color:#27500A;font-weight:500">March 2019  ↑ Peak</div>
+          <div class="forecast-bar-wrap"><div class="forecast-bar-fill" style="width:100%;background:#3B6D11"></div></div>
+          <div><div class="forecast-val" style="color:#27500A">$78,981</div><div class="forecast-ci" style="color:#3B6D11">$71K – $87K</div></div>
+        </div>
+        <div class="forecast-row">
+          <div class="forecast-month">April 2019</div>
+          <div class="forecast-bar-wrap"><div class="forecast-bar-fill" style="width:61%"></div></div>
+          <div><div class="forecast-val">$48,562</div><div class="forecast-ci">$41K – $56K</div></div>
+        </div>
+        <div class="forecast-row">
+          <div class="forecast-month">May 2019</div>
+          <div class="forecast-bar-wrap"><div class="forecast-bar-fill" style="width:65%"></div></div>
+          <div><div class="forecast-val">$50,969</div><div class="forecast-ci">$43K – $58K</div></div>
+        </div>
+        <div class="forecast-row">
+          <div class="forecast-month">June 2019</div>
+          <div class="forecast-bar-wrap"><div class="forecast-bar-fill" style="width:75%"></div></div>
+          <div><div class="forecast-val">$59,013</div><div class="forecast-ci">$51K – $66K</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Annual performance summary</div>
+      <div class="ch-wrap" style="height:160px"><canvas id="c_annual2" role="img" aria-label="Annual revenue: 2015 $480K, 2016 $459K (-4.3%), 2017 $600K (+30.6%), 2018 $722K (+20.3%)">Annual revenue waterfall</canvas></div>
+      <div style="margin-top:12px">
+        <div class="card-title">Model details</div>
+        <table class="tbl" style="margin-top:6px">
+          <thead><tr><th>Metric</th><th>Value</th></tr></thead>
+          <tbody>
+            <tr><td>Algorithm</td><td>Facebook Prophet</td></tr>
+            <tr><td>Training data</td><td>44 months (2015–Aug 2018)</td></tr>
+            <tr><td>Holdout test</td><td>4 months (Sep–Dec 2018)</td></tr>
+            <tr><td>MAPE</td><td style="color:#854F0B">16.8%</td></tr>
+            <tr><td>Seasonality</td><td>Yearly enabled</td></tr>
+            <tr><td>H1-2019 total</td><td style="color:#185FA5;font-weight:500">$311,110</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+function switchPage(id, btn) {
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active')});
+  document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active')});
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+
+var isDark = matchMedia('(prefers-color-scheme:dark)').matches;
+var gridColor = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
+var labelColor = isDark ? '#888780' : '#73726c';
+var textColor = isDark ? '#c2c0b6' : '#3d3d3a';
+
+var months48 = ['Jan-15','','Mar-15','','','Jun-15','','','Sep-15','','Nov-15','',
+  'Jan-16','','Mar-16','','','Jun-16','','','Sep-16','','Nov-16','',
+  'Jan-17','','Mar-17','','','Jun-17','','','Sep-17','','Nov-17','',
+  'Jan-18','','Mar-18','','','Jun-18','','','Sep-18','','Nov-18',''];
+
+var salesData = [14206,4520,55206,27907,23644,34323,33782,27118,81624,31453,77908,68167,
+  18067,11951,32339,34154,29960,23599,28608,36818,63134,31012,75249,74544,
+  18542,22979,51165,38680,56657,39724,38321,30542,69193,59583,79066,95739,
+  43476,19921,58863,35542,43826,48191,44825,62838,86153,77448,117938,83030];
+
+function fmt(v){return '$'+(v>=1000?(v/1000).toFixed(0)+'K':v)}
+function fmtM(v){return '$'+(v/1000000).toFixed(2)+'M'}
+
+var defOpts = {responsive:true,maintainAspectRatio:false,
+  plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return ' $'+Math.round(c.raw).toLocaleString()}}}},
+  scales:{x:{grid:{color:gridColor},ticks:{color:labelColor,font:{size:10}}},
+          y:{grid:{color:gridColor},ticks:{color:labelColor,font:{size:10},callback:function(v){return fmt(v)}}}}};
+
+new Chart(document.getElementById('c_monthly'),{
+  type:'bar',
+  data:{labels:months48,datasets:[{
+    data:salesData,
+    backgroundColor:salesData.map(function(v,i){
+      var yr=Math.floor(i/12);
+      return ['rgba(55,138,221,0.55)','rgba(55,138,221,0.65)','rgba(55,138,221,0.8)','rgba(55,138,221,1)'][yr];
+    }),
+    borderRadius:2
+  }]},
+  options:Object.assign({},defOpts,{
+    plugins:Object.assign({},defOpts.plugins,{
+      tooltip:{callbacks:{label:function(c){return ' $'+Math.round(c.raw).toLocaleString()}}},
+      annotation:{}
+    }),
+    scales:{x:{grid:{display:false},ticks:{color:labelColor,font:{size:9},maxRotation:0}},
+            y:{grid:{color:gridColor},ticks:{color:labelColor,font:{size:10},callback:function(v){return fmt(v)}}}}
+  })
+});
+
+new Chart(document.getElementById('c_annual'),{
+  type:'bar',
+  data:{
+    labels:['2015','2016  \u22124.3%','2017  +30.6%','2018  +20.3%'],
+    datasets:[{
+      data:[479856,459436,600193,722052],
+      backgroundColor:['#378ADD','#E24B4A','#639922','#1D9E75'],
+      borderRadius:4
+    }]
+  },
+  options:Object.assign({},defOpts,{
+    scales:{x:{grid:{display:false},ticks:{color:labelColor,font:{size:11}}},
+            y:{grid:{color:gridColor},ticks:{color:labelColor,font:{size:10},callback:function(v){return '$'+(v/1000).toFixed(0)+'K'}}}}
+  })
+});
+
+new Chart(document.getElementById('c_segment'),{
+  type:'doughnut',
+  data:{
+    labels:['Consumer 50.8%','Corporate 30.4%','Home Office 18.8%'],
+    datasets:[{data:[1148061,688494,424982],backgroundColor:['#378ADD','#1D9E75','#BA7517'],borderWidth:2,borderColor:isDark?'#1a1a1a':'#fff'}]
+  },
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom',labels:{color:textColor,font:{size:10},padding:8,boxWidth:10}}},cutout:'60%'}
+});
+
+new Chart(document.getElementById('c_category'),{
+  type:'doughnut',
+  data:{
+    labels:['Technology 36.6%','Furniture 32.2%','Office Sup. 31.2%'],
+    datasets:[{data:[827456,728659,705422],backgroundColor:['#185FA5','#639922','#EF9F27'],borderWidth:2,borderColor:isDark?'#1a1a1a':'#fff'}]
+  },
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom',labels:{color:textColor,font:{size:10},padding:8,boxWidth:10}}},cutout:'60%'}
+});
+
+new Chart(document.getElementById('c_shipmode'),{
+  type:'doughnut',
+  data:{
+    labels:['Standard Class 60%','Second Class 19%','First Class 15%','Same Day 6%'],
+    datasets:[{data:[5859,1902,1501,538],backgroundColor:['#E24B4A','#378ADD','#1D9E75','#EF9F27'],borderWidth:2,borderColor:isDark?'#1a1a1a':'#fff'}]
+  },
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom',labels:{color:textColor,font:{size:10},padding:8,boxWidth:10}}},cutout:'60%'}
+});
+
+new Chart(document.getElementById('c_region_bar'),{
+  type:'bar',
+  data:{
+    labels:['West','East','Central','South'],
+    datasets:[{data:[710220,669519,492647,389151],backgroundColor:['#378ADD','#1D9E75','#EF9F27','#E24B4A'],borderRadius:4}]
+  },
+  options:Object.assign({},defOpts,{
+    scales:{x:{grid:{display:false},ticks:{color:labelColor,font:{size:11}}},
+            y:{grid:{color:gridColor},ticks:{color:labelColor,font:{size:10},callback:function(v){return '$'+(v/1000).toFixed(0)+'K'}}}}
+  })
+});
+
+new Chart(document.getElementById('c_region_delay'),{
+  type:'bar',
+  data:{
+    labels:['Central\n18.9%','West\n18.8%','South\n17.7%','East\n17.3%'],
+    datasets:[{data:[18.9,18.8,17.7,17.3],backgroundColor:['#E24B4A','#BA7517','#EF9F27','#1D9E75'],borderRadius:4}]
+  },
+  options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return ' '+c.raw+'% delay rate'}}}},
+    scales:{x:{grid:{display:false},ticks:{color:labelColor,font:{size:10}}},
+            y:{grid:{color:gridColor},min:16,max:20,ticks:{color:labelColor,font:{size:10},callback:function(v){return v+'%'}}}}}
+});
+
+new Chart(document.getElementById('c_subcat'),{
+  type:'bar',
+  data:{
+    labels:['Phones','Chairs','Storage','Tables','Binders','Machines','Accessories','Copiers','Bookcases','Appliances'],
+    datasets:[{
+      data:[327782,322823,219343,202811,200029,189239,164187,146248,113813,104618],
+      backgroundColor:['#185FA5','#185FA5','#3B6D11','#3B6D11','#3B6D11','#185FA5','#185FA5','#185FA5','#854F0B','#854F0B'],
+      borderRadius:3
+    }]
+  },
+  options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return ' $'+Math.round(c.raw).toLocaleString()}}}},
+    scales:{
+      x:{grid:{color:gridColor},ticks:{color:labelColor,font:{size:10},callback:function(v){return '$'+(v/1000).toFixed(0)+'K'}}},
+      y:{grid:{display:false},ticks:{color:labelColor,font:{size:11}}}
+    }}
+});
+
+new Chart(document.getElementById('c_cat_donut'),{
+  type:'doughnut',
+  data:{
+    labels:['Technology','Furniture','Office Supplies'],
+    datasets:[{data:[827456,728659,705422],backgroundColor:['#185FA5','#639922','#EF9F27'],borderWidth:2,borderColor:isDark?'#1a1a1a':'#fff'}]
+  },
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom',labels:{color:textColor,font:{size:10},padding:8,boxWidth:10}}},cutout:'55%'}
+});
+
+new Chart(document.getElementById('c_rfm_donut'),{
+  type:'doughnut',
+  data:{
+    labels:['Champions 29.4%','Loyal 25.2%','At Risk 21.6%','Pot. Loyalists 13%','Recent 7%','Lost 3.7%'],
+    datasets:[{
+      data:[664889,570646,489373,294247,158482,83900],
+      backgroundColor:['#3B6D11','#378ADD','#EF9F27','#7F77DD','#888780','#E24B4A'],
+      borderWidth:2,borderColor:isDark?'#1a1a1a':'#fff'
+    }]
+  },
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom',labels:{color:textColor,font:{size:10},padding:6,boxWidth:10}}},cutout:'55%'}
+});
+
+new Chart(document.getElementById('c_rfm_bar'),{
+  type:'bar',
+  data:{
+    labels:['Champions','Loyal','Pot.Loyal','At Risk','Recent','Lost'],
+    datasets:[{
+      data:[169,166,157,141,89,71],
+      backgroundColor:['#3B6D11','#378ADD','#7F77DD','#EF9F27','#888780','#E24B4A'],
+      borderRadius:4
+    }]
+  },
+  options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return ' '+c.raw+' customers'}}}},
+    scales:{x:{grid:{display:false},ticks:{color:labelColor,font:{size:10}}},
+            y:{grid:{color:gridColor},ticks:{color:labelColor,font:{size:10}}}}}
+});
+
+var allMonths=['Jan-15','Feb-15','Mar-15','Apr-15','May-15','Jun-15','Jul-15','Aug-15','Sep-15','Oct-15','Nov-15','Dec-15',
+  'Jan-16','Feb-16','Mar-16','Apr-16','May-16','Jun-16','Jul-16','Aug-16','Sep-16','Oct-16','Nov-16','Dec-16',
+  'Jan-17','Feb-17','Mar-17','Apr-17','May-17','Jun-17','Jul-17','Aug-17','Sep-17','Oct-17','Nov-17','Dec-17',
+  'Jan-18','Feb-18','Mar-18','Apr-18','May-18','Jun-18','Jul-18','Aug-18','Sep-18','Oct-18','Nov-18','Dec-18',
+  'Jan-19','Feb-19','Mar-19','Apr-19','May-19','Jun-19'];
+var allSales=salesData.concat([41378,32207,78981,48562,50969,59013]);
+var fcStart=48;
+
+new Chart(document.getElementById('c_forecast'),{
+  type:'bar',
+  data:{
+    labels:allMonths.filter(function(_,i){return i%3===0||i>=48}),
+    datasets:[
+      {type:'bar',label:'Actual',data:allSales.slice(0,48).filter(function(_,i){return i%3===0}),backgroundColor:'rgba(55,138,221,0.55)',borderRadius:2},
+      {type:'bar',label:'Forecast',data:[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null].concat(allSales.slice(48)),backgroundColor:'rgba(59,109,17,0.7)',borderRadius:2}
+    ]
+  },
+  options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:true,position:'top',labels:{color:textColor,font:{size:11},boxWidth:12,padding:12}},
+      tooltip:{callbacks:{label:function(c){return (c.dataset.label||'')+': $'+Math.round(c.raw).toLocaleString()}}}},
+    scales:{x:{grid:{display:false},ticks:{color:labelColor,font:{size:10},maxRotation:45}},
+            y:{grid:{color:gridColor},ticks:{color:labelColor,font:{size:10},callback:function(v){return '$'+(v/1000).toFixed(0)+'K'}}}}}
+});
+
+new Chart(document.getElementById('c_annual2'),{
+  type:'bar',
+  data:{
+    labels:['2015','2016','2017','2018'],
+    datasets:[{data:[479856,459436,600193,722052],backgroundColor:['#378ADD','#E24B4A','#639922','#1D9E75'],borderRadius:4}]
+  },
+  options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return ' $'+(c.raw/1000).toFixed(0)+'K'}}}},
+    scales:{x:{grid:{display:false},ticks:{color:labelColor,font:{size:11}}},
+            y:{grid:{color:gridColor},ticks:{color:labelColor,font:{size:10},callback:function(v){return '$'+(v/1000).toFixed(0)+'K'}}}}}
+});
+</script>

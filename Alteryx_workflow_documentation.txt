@@ -1,0 +1,117 @@
+ALTERYX ETL WORKFLOW DOCUMENTATION
+=====================================
+Project  : Retail Analytics Intelligence Platform
+Database : MySQL 8.0  (retail_analytics)
+Dataset  : train.csv  (9,800 rows, 18 columns)
+Tool     : Alteryx Designer 22.x+
+
+WORKFLOW FILE: retail_etl_mysql.yxmd
+--------------------------------------
+
+STEP 1 — Input Data Tool
+  File     : train.csv
+  Settings :
+    First Row Contains Field Names : YES
+    Field Delimiter                : Comma  (,)
+    Code Page                      : UTF-8
+    Ignore Errors                  : NO
+  Expected : 9,800 rows × 18 columns stream
+
+STEP 2 — Data Cleansing Tool
+  Actions :
+    Trim whitespace on ALL string fields
+    Replace Nulls in [Postal Code]  → "00000"  (11 null rows)
+    Remove duplicate [Row ID] values
+    Standardise [Segment] casing    → Consumer | Corporate | Home Office
+  Expected : 9,800 clean rows, 0 nulls in key columns
+
+STEP 3 — Formula Tool  (Add 6 derived business fields)
+  [delivery_days]  = DateTimeDiff([Ship Date], [Order Date], "Days")
+                     Values: 0 (Same Day) to 7 (Standard Class max)
+
+  [is_delayed]     = IF [delivery_days] > 5 THEN 1 ELSE 0 ENDIF
+                     1,785 rows = 1  (18.2% delay rate)
+
+  [order_year]     = DateTimeYear([Order Date])
+                     Values: 2015 | 2016 | 2017 | 2018
+
+  [order_month]    = DateTimeMonth([Order Date])
+                     Values: 1–12
+
+  [order_quarter]  = IF [order_month] <= 3 THEN "Q1"
+                     ELSEIF [order_month] <= 6 THEN "Q2"
+                     ELSEIF [order_month] <= 9 THEN "Q3"
+                     ELSE "Q4" ENDIF
+
+  [revenue_band]   = IF [Sales] >= 1000 THEN "High (>$1K)"
+                     ELSEIF [Sales] >= 200 THEN "Medium ($200-$1K)"
+                     ELSE "Low (<$200)" ENDIF
+
+STEP 4 — Summarize Tool  (Regional KPIs)
+  Group By : [Region], [order_year], [order_quarter]
+  Sum      : [Sales]         → [total_sales]
+  Count    : [Order ID]      → [order_count]  (distinct)
+  Avg      : [delivery_days] → [avg_delivery_days]
+  Sum      : [is_delayed]    → [delayed_count]
+  Output   : ~64 rows (4 regions × 4 years × 4 quarters)
+
+STEP 5 — Summarize Tool  (Category KPIs)
+  Group By : [Category], [Sub-Category], [order_year]
+  Sum      : [Sales]         → [total_sales]
+  Count    : [Row ID]        → [line_items]
+  Avg      : [Sales]         → [avg_sale]
+  Output   : ~68 rows (17 sub-categories × 4 years)
+
+STEP 6 — Output Tool  (MySQL via ODBC)
+  Connection : MySQL ODBC DSN = "retail_analytics_mysql"
+               Server=localhost | Port=3306
+               Database=retail_analytics
+               User=your_mysql_user
+  Output 1   : fact_orders     → full 9,800-row enriched fact table
+  Output 2   : kpi_regional    → 64-row regional aggregation
+  Output 3   : kpi_category    → 68-row category aggregation
+  Write Mode : Overwrite Table (Drop + Recreate)
+  Encoding   : UTF-8
+
+STEP 7 (Optional) — Predictive Tool  (Delay Risk Scoring)
+  Tool       : Logistic Regression (built-in R runtime)
+  Target     : [is_delayed]
+  Predictors : [Ship Mode], [Region], [Category], [Month]
+  Output     : Append [delay_probability] column to fact_orders
+  Note       : AUC ~0.755 in R runtime vs 0.788 in Python GBM
+
+SCHEDULING
+-----------
+  Server    : Alteryx Server
+  Schedule  : Daily 06:00 AM
+  On Failure: Email alert to analyst@company.com
+  Log path  : /logs/retail_etl_YYYY-MM-DD.log
+
+MYSQL ODBC SETUP
+-----------------
+  1. Download MySQL Connector/ODBC from dev.mysql.com
+  2. Create DSN in Windows ODBC Administrator:
+       Data Source Name : retail_analytics_mysql
+       Server           : localhost
+       Port             : 3306
+       Database         : retail_analytics
+       User/Password    : your credentials
+  3. In Alteryx Output Tool → Connection → ODBC → select DSN above
+
+OUTPUTS GENERATED
+------------------
+  fact_orders.csv     → 9,800 rows + 6 derived fields (for manual import)
+  kpi_regional.csv    → Regional quarterly KPIs
+  kpi_category.csv    → Category annual KPIs
+  (All also written directly to MySQL via ODBC)
+
+INTERVIEW TALKING POINT
+------------------------
+"I built a 7-step Alteryx workflow that ingests the Superstore train.csv
+(9,800 rows), handles 11 null postal codes using the Cleansing tool, then
+uses the Formula tool to derive 6 new business fields including delivery_days,
+is_delayed, and a quarterly band. Two parallel Summarize tools aggregate KPIs
+at regional-quarterly and sub-category-annual levels. All three outputs write
+directly to MySQL 8.0 via ODBC — the full fact table plus two KPI tables —
+in a single workflow run scheduled at 6am daily on Alteryx Server, so Power BI
+dashboards refresh automatically each morning without any manual intervention."
