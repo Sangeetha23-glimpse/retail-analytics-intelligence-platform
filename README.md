@@ -111,7 +111,7 @@ retail-analytics-platform/
 
 ## 🌐 Live Dashboard
 
-(Enable GitHub Pages to add your live link here)
+( https://Sangeetha23-glimps/retail-analytics-intelligence-platform/)
 
 ---
 
