@@ -71,13 +71,13 @@ retail-analytics-platform/
 
 ### 🔹 Executive Summary
 
-![Executive Summary](images/executive_summary.png)
+![Executive Summary](Images/executive_summary)
 
 ---
 
 ### 🔹 Regional Analysis
 
-![Regional Analysis](images/regional_analysis.png)
+![Regional Analysis](Images/regional_analysis.png)
 
 ---
 
