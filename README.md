@@ -83,19 +83,19 @@ retail-analytics-platform/
 
 ### 🔹 Product Analysis
 
-![Product Analysis](images/product_analysis.png)
+![Product Analysis](Images/product_analysis.png)
 
 ---
 
 ### 🔹 Customer Insights (RFM)
 
-![Customer Insights](images/customer_insights.png)
+![Customer Insights](Images/customer_insights.png)
 
 ---
 
 ### 🔹 Sales Forecast
 
-![Sales Forecast](images/sales_forecast.png)
+![Sales Forecast](Images/sales_forecast.png)
 
 ---
 
