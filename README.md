@@ -71,7 +71,7 @@ retail-analytics-platform/
 
 ### 🔹 Executive Summary
 
-![Executive Summary](Images/executive_summary)
+![Executive Summary](Images/executive_summary.png)
 
 ---
 
