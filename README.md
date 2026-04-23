@@ -111,7 +111,7 @@ retail-analytics-platform/
 
 ## 🌐 Live Dashboard
 
-(https://sangeetha23-glimpse.github.io/retail-analytics-intelligence-platform/) 
+(https://sangeetha23-glimpse.github.io/retail-analytics-intelligence-platform/index.html) 
 
 ---
 
